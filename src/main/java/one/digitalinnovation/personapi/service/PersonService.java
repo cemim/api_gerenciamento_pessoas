@@ -1,5 +1,6 @@
 package one.digitalinnovation.personapi.service;
 
+import lombok.AllArgsConstructor;
 import one.digitalinnovation.personapi.dto.request.PersonDTO;
 import one.digitalinnovation.personapi.dto.response.MessageResponseDTO;
 import one.digitalinnovation.personapi.entity.Person;
@@ -16,15 +17,16 @@ import java.util.stream.Collectors;
 
 // Regras de negócio
 @Service
+@AllArgsConstructor(onConstructor = @__(@Autowired)) // Sem necessidade de criar o construtor
 public class PersonService {
     private PersonRepository personRepository;
 
     private final PersonMapper personMapper = PersonMapper.INSTANCE;
 
-    @Autowired
-    public PersonService(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
+//    @Autowired
+//    public PersonService(PersonRepository personRepository) {
+//        this.personRepository = personRepository;
+//    }
 
     public MessageResponseDTO createPerson(PersonDTO personDTO){
         // birthDate in DTO return a String and in class Person return LocalDate
@@ -34,10 +36,11 @@ public class PersonService {
 //                .lastName(personDTO.getLastName())
 //                .birthDate(personDTO.getBirthDate())
 //                .build();
+
         Person personToSave = personMapper.toModel(personDTO);
 
         Person savedPerson = personRepository.save(personToSave);
-        return createMessageResponse(savedPerson, "Created person with ID ");
+        return createMessageResponse(savedPerson.getId(), "Created person with ID ");
     }
 
     public List<PersonDTO> listAll() {
@@ -73,13 +76,13 @@ public class PersonService {
         Person personToUpdate = personMapper.toModel(personDTO);
 
         Person updatedPerson = personRepository.save(personToUpdate);
-        return createMessageResponse(updatedPerson, "Updated person with ID ");
+        return createMessageResponse(updatedPerson.getId(), "Updated person with ID ");
     }
 
-    private MessageResponseDTO createMessageResponse(Person savedPerson, String message) {
+    private MessageResponseDTO createMessageResponse(Long id, String message) {
         return MessageResponseDTO
                 .builder()
-                .message(message + savedPerson.getId())
+                .message(message + id)
                 .build();
     }
 
@@ -87,4 +90,5 @@ public class PersonService {
         return personRepository.findById(id)
                 .orElseThrow(() -> new PersonNotFoundException(id));
     }
+
 }
